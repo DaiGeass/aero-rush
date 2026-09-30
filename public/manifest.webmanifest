@@ -1,0 +1,20 @@
+{
+  "name": "Aero Rush · Carreras 3D Frutiger Aero",
+  "short_name": "Aero Rush",
+  "description": "Carreras 3D estilo Frutiger Aero: cristal, burbujas, día y noche. 8 coches, 3 modos de juego y turbo.",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#cdf3ff",
+  "theme_color": "#49b8ff",
+  "categories": ["games", "racing"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
