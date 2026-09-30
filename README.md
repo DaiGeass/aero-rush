@@ -77,6 +77,10 @@ Notas: el `.AppImage` necesita `libfuse2` (`sudo apt install libfuse2`); el `.de
 para Debian 12+ / Ubuntu 24.04+; y los instaladores de Windows **no van firmados**, así que
 SmartScreen avisará la primera vez.
 
+El sonido se genera con WebAudio. En Linux el motor es WebKitGTK, que a veces arranca el
+`AudioContext` suspendido: la app lo reanuda sola con el primer clic o tecla, así que **pulsa
+una vez sobre la ventana antes de esperar audio**.
+
 ## 🚀 Publicación automática
 
 | Workflow | Qué hace |

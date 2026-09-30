@@ -152,7 +152,21 @@ export default function App() {
     engine.applySettings(settingsRef.current);
     engine.setMode(modeRef.current, diffRef.current);
     engineRef.current = engine;
+    // WebKitGTK (el motor de Linux en Tauri) crea el AudioContext suspendido
+    // aunque nazca dentro de un clic: lo forzamos con el primer gesto real.
+    const unlock = () => audio.unlock();
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
+    const onVisible = () => {
+      if (!document.hidden) audio.unlock();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("touchstart", unlock);
+      document.removeEventListener("visibilitychange", onVisible);
       engine.dispose();
       engineRef.current = null;
     };

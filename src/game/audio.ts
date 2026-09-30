@@ -35,6 +35,9 @@ class AudioEngine {
     if (!AC) return;
     const ctx = new AC();
     this.ctx = ctx;
+    // WebKitGTK (el motor de Linux en Tauri) nace en "suspended" aunque
+    // se cree dentro de un clic: hay que reanudarlo explícitamente.
+    if (ctx.state === 'suspended') void ctx.resume();
     this.master = ctx.createGain();
     this.master.gain.value = this.muted ? 0 : this.volume;
     const comp = ctx.createDynamicsCompressor();
@@ -74,6 +77,12 @@ class AudioEngine {
     this.engineGain.connect(this.sfxBus);
     this.engineOsc.start();
     this.engineOsc2.start();
+  }
+
+  /** Reanuda el contexto si el motor lo dejó suspendido (típico en WebKitGTK). */
+  unlock() {
+    this.ensure();
+    if (this.ctx && this.ctx.state === 'suspended') void this.ctx.resume();
   }
 
   setMuted(m: boolean) {
@@ -194,7 +203,15 @@ class AudioEngine {
   // ---------- Music ----------
   startMusic() {
     this.ensure();
-    if (!this.ctx || this.musicOn) return;
+    if (!this.ctx) return;
+    // Si el motor lo dejó suspendido (WebKitGTK), reanímalo y reintenta en un
+    // instante: si no, el planificador avanza el tiempo sobre un contexto parado
+    // y se pierde toda la música.
+    if (this.ctx.state === 'suspended') {
+      void this.ctx.resume().then(() => this.startMusic());
+      return;
+    }
+    if (this.musicOn) return;
     this.musicOn = true;
     this.nextNoteTime = this.ctx.currentTime + 0.1;
     this.timer = window.setInterval(() => this.schedule(), 60);
@@ -206,6 +223,13 @@ class AudioEngine {
   }
   private schedule() {
     if (!this.ctx) return;
+    // Un contexto suspendido tiene currentTime congelado: si no lo saltamos,
+    // el bucle se llenaría de notas para un tiempo que nunca llega.
+    if (this.ctx.state === 'suspended') {
+      void this.ctx.resume();
+      this.nextNoteTime = this.ctx.currentTime + 0.1;
+      return;
+    }
     const spb = 60 / 112 / 2; // eighth notes at 112bpm
     // Cmaj7, Am9, Fmaj7, G6 in midi
     const chords = [
