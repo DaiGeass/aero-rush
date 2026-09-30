@@ -9,7 +9,8 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>
 );
 
-// PWA: registra el service worker sólo en web de producción (no bajo file:// en Electron).
+// PWA: registra el service worker sólo en la web de producción.
+// Tauri sirve la app con su propio protocolo, así que allí no hace falta (ni funciona).
 if (
   import.meta.env.PROD &&
   "serviceWorker" in navigator &&

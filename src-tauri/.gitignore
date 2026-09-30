@@ -1,0 +1,4 @@
+# generado por cargo
+/target/
+# generado por tauri
+/gen/schemas/

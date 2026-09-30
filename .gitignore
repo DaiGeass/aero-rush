@@ -8,8 +8,9 @@ dist/
 dist-ssr/
 *.local
 
-# instaladores de electron-builder
+# instaladores (tauri)
 release/
+src-tauri/target/
 
 # artefactos de SingleFile
 stats.html

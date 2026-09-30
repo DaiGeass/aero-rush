@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permisos minimos de Aero Rush: la app es una web que no usa APIs de Tauri.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
