@@ -1,0 +1,52 @@
+appId: com.daigeass.aerorush
+productName: Aero Rush
+copyright: Copyright (c) 2026 Daigeass & GLP
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**
+  - electron/**
+  - package.json
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: msi
+      arch: [x64]
+  icon: build/icon.png
+  artifactName: "${productName} Setup ${version}.${ext}"
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Aero Rush
+
+msi:
+  oneClick: false
+  perMachine: true
+  upgradeCode: 7c1f2a44-9d3b-4e58-8a10-6b2f5c9d0e71
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  icon: build/icons
+  category: Game
+  maintainer: Daigeass & GLP
+  synopsis: Carreras 3D estilo Frutiger Aero
+  description: Carreras 3D estilo Frutiger Aero con cristal, burbujas, tres modos, dificultad ajustable y ciclo de día y noche.
+  desktop:
+    Name: Aero Rush
+    Comment: Carreras 3D estilo Frutiger Aero
+    Categories: Game;ArcadeGame;

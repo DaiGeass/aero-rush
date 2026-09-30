@@ -1,0 +1,88 @@
+name: Instaladores
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: installers-${{ matrix.artifact }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Empaquetar ${{ matrix.artifact }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win
+            artifact: windows
+          - os: ubuntu-latest
+            target: --linux
+            artifact: linux
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Herramientas de empaquetado (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fakeroot
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Comprobar tipos
+        run: npm run typecheck
+
+      - name: Compilar la web
+        run: npm run build
+
+      - name: Empaquetar instaladores
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      - name: Subir artefactos
+        uses: actions/upload-artifact@v4
+        with:
+          name: aero-rush-${{ matrix.artifact }}
+          path: |
+            release/*.exe
+            release/*.msi
+            release/*.deb
+            release/*.AppImage
+          if-no-files-found: error
+
+  release:
+    name: Publicar release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar artefactos
+        uses: actions/download-artifact@v4
+        with:
+          path: artefactos
+
+      - name: Crear release de GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artefactos/**/*.exe
+            artefactos/**/*.msi
+            artefactos/**/*.deb
+            artefactos/**/*.AppImage
+          generate_release_notes: true

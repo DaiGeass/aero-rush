@@ -6,8 +6,10 @@ node_modules/
 # build / salida
 dist/
 dist-ssr/
-build/
 *.local
+
+# instaladores de electron-builder
+release/
 
 # artefactos de SingleFile
 stats.html

@@ -9,8 +9,12 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>
 );
 
-// PWA: registra el service worker sólo en producción para poder jugar offline.
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
+// PWA: registra el service worker sólo en web de producción (no bajo file:// en Electron).
+if (
+  import.meta.env.PROD &&
+  "serviceWorker" in navigator &&
+  location.protocol.startsWith("http")
+) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {
       /* sin service worker: la app sigue funcionando */

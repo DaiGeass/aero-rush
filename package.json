@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "electron": "electron .",
+    "electron:dev": "npm run build && electron .",
+    "pack:win": "npm run build && electron-builder --win --publish never",
+    "pack:linux": "npm run build && electron-builder --linux --publish never",
+    "pack:current": "npm run build && electron-builder --publish never"
   },
   "dependencies": {
     "@types/three": "^0.186.0",
@@ -23,6 +28,8 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3",
     "vite": "7.3.2",
@@ -30,5 +37,6 @@
   },
   "description": "Carreras 3D estilo Frutiger Aero: cristal, burbujas, 8 coches, 3 modos y ciclo de día y noche.",
   "author": "Daigeass & GLP",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "electron/main.cjs"
 }

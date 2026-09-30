@@ -37,9 +37,32 @@ npm run build      # genera dist/ (index.html autocontenido)
 npm run preview    # sirve la build
 ```
 
+## 🖥️ Aplicación de escritorio
+
+El mismo juego empaquetado con **Electron**, sin navegador:
+
+```bash
+npm install
+npm run pack:linux   # .deb + .AppImage en release/
+npm run pack:win     # .exe (NSIS) + .msi en release/
+npm run electron:dev # prueba la app sin empaquetar
+```
+
+Los artefactos se generan en `release/`. En Linux, para ejecutar el `.AppImage` hace falta `libfuse2`:
+
+```bash
+sudo apt install libfuse2
+./release/*.AppImage
+```
+
 ## 🚀 Publicación
 
-El workflow [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) compila y publica en **GitHub Pages** en cada push a `main`. En el repositorio, activa `Settings → Pages → Build and deployment → Source: GitHub Actions`.
+- **Web / PWA**: el workflow [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) compila y publica en **GitHub Pages** en cada push a `main`. Activa `Settings → Pages → Build and deployment → Source: GitHub Actions`.
+- **Instaladores**: el workflow [`.github/workflows/installers.yml`](./.github/workflows/installers.yml) genera los cuatro paquetes en paralelo (Windows en `windows-latest`, Linux en `ubuntu-latest`) y los deja como artefactos de la ejecución. Al crear un tag `v1.0.0` (push) además los adjunta a un **release** de GitHub.
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
 
 ## 📁 Estructura
 
@@ -54,5 +77,7 @@ src/
     audio.ts         efectos y música procedural
     scores.ts        récords (por modo)
   ui/                Garaje, tabla de récords, ajustes, selector de modo
+electron/main.cjs    ventana de escritorio
+build/               iconos que usa electron-builder
 public/              manifest, service worker, iconos, favicon
 ```
