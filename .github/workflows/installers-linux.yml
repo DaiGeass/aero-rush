@@ -38,7 +38,8 @@ jobs:
             libxdo-dev \
             libssl-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev
+            librsvg2-dev \
+            libarchive-tools
 
       - name: Rust estable
         uses: dtolnay/rust-toolchain@stable
@@ -62,9 +63,10 @@ jobs:
           # desempaquetamos y lo reempaquetamos como tarball con su .desktop
           # y sus iconos.
           STAGE="$(mktemp -d)"
-          bsdtar -xf src-tauri/target/release/bundle/deb/*.deb -C "$STAGE"
           mkdir -p "$STAGE/root"
-          bsdtar -xf "$STAGE"/data.tar.* -C "$STAGE/root"
+          ar -x src-tauri/target/release/bundle/deb/*.deb --output "$STAGE"
+          tar -xf "$STAGE"/data.tar.* -C "$STAGE/root" 2>/dev/null || (tar -xzf "$STAGE"/data.tar.gz -C "$STAGE/root" 2>/dev/null || tar -xf "$STAGE"/data.tar.xz -C "$STAGE/root")
+
           tar -cJf "$GITHUB_WORKSPACE/aero-rush-portable.tar.xz" -C "$STAGE/root" .
           rm -rf "$STAGE"
           tar -tJf "$GITHUB_WORKSPACE/aero-rush-portable.tar.xz" | head -20
