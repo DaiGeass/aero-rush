@@ -1,6 +1,6 @@
 [package]
 name = "aero-rush"
-version = "1.0.0"
+version = "1.0.1"
 description = "Carreras 3D en estilo Frutiger Aero: cristal, burbujas, día y noche."
 authors = ["Daigeass & GLP"]
 license = "MIT"
