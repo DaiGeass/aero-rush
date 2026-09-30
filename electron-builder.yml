@@ -46,7 +46,3 @@ linux:
   maintainer: Daigeass & GLP
   synopsis: Carreras 3D estilo Frutiger Aero
   description: Carreras 3D estilo Frutiger Aero con cristal, burbujas, tres modos, dificultad ajustable y ciclo de día y noche.
-  desktop:
-    Name: Aero Rush
-    Comment: Carreras 3D estilo Frutiger Aero
-    Categories: Game;ArcadeGame;
