@@ -118,5 +118,6 @@ jobs:
             artefactos/**/*.msi
             artefactos/**/*.deb
             artefactos/**/*.AppImage
+            artefactos/**/*.tar.xz
           fail_on_unmatched_files: false
           generate_release_notes: true

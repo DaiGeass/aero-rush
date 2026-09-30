@@ -73,6 +73,34 @@ Los objetivos se toman de `src-tauri/tauri.windows.conf.json` (`.exe` + `.msi`) 
 npm run desktop:build -- --bundles deb
 ```
 
+### ⚠️ Audio en Linux: usa el `.deb` o el `.tar.xz`, no el `.AppImage`
+
+El `.AppImage` **sale mudo**, y no es culpa de tu sistema. Tauri's AppImage bundler mete las
+librerías de GStreamer (`libgstreamer-1.0.so.0`, **1.24**) pero **no los plugins de audio**
+(`gstreamer1.0-plugins-base`). El WebKitGTK del AppImage busca `autoaudiosink`, no lo
+encuentra y se queda sin salida de sonido:
+
+```
+GStreamer element autoaudiosink not found. Please install it
+```
+
+Los plugins de tu sistema son de GStreamer **1.28**, así que tampoco valen para el núcleo 1.24
+empaquetado. El `.deb` y el `.tar.xz` no empaquetan nada de esto: usan el GStreamer del sistema
+y suenan bien.
+
+| Distribución | Qué usar |
+| --- | --- |
+| Debian / Ubuntu | `Aero.Rush_<ver>_amd64.deb` con `sudo apt install ./Aero.Rush_*.deb` |
+| **Arch / Fedora / openSUSE** | `aero-rush-portable.tar.xz`, descomprime y ejecuta `usr/bin/aero-rush` |
+| Cualquiera, sin instalar | `Aero.Rush_<ver>_amd64.AppImage` — **sin audio** |
+
+En Arch:
+
+```bash
+tar -xJf aero-rush-portable.tar.xz
+./usr/bin/aero-rush
+```
+
 Notas: el `.AppImage` necesita `libfuse2` (`sudo apt install libfuse2`); el `.deb` está pensado
 para Debian 12+ / Ubuntu 24.04+; y los instaladores de Windows **no van firmados**, así que
 SmartScreen avisará la primera vez.
@@ -86,7 +114,8 @@ una vez sobre la ventana antes de esperar audio**.
 | Workflow | Qué hace |
 | --- | --- |
 | [`deploy.yml`](./.github/workflows/deploy.yml) | Compila y publica la **web** en GitHub Pages en cada push a `main`. |
-| [`installers.yml`](./.github/workflows/installers.yml) | Compila los **cuatro instaladores** en paralelo (Windows en `windows-latest`, Linux en `ubuntu-latest`) y los deja como artefactos. Al hacer tag, además se adjuntan a un **release**. |
+| [`installers.yml`](./.github/workflows/installers.yml) | Compila los **instaladores de Windows** y adjunta los 4 artefactos al **release** cuando hay tag. |
+| [`installers-linux.yml`](./.github/workflows/installers-linux.yml) | Compila los de **Linux**: `.deb`, `.AppImage` (sin audio) y el `.tar.xz` portable que sí suena. |
 
 - La versión de los instaladores está en sincronía: `package.json`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.toml` comparten la misma versión. Para publicar un parche, basta con subir un tag `vX.Y.Z` (el CI adjunta los 4 instaladores en el release).
 
