@@ -9,14 +9,13 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: installers-${{ matrix.artifact }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
-
 jobs:
   build:
     name: Empaquetar ${{ matrix.artifact }}
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: installers-${{ matrix.artifact }}
+      cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     strategy:
       fail-fast: false
       matrix:
