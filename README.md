@@ -88,8 +88,10 @@ una vez sobre la ventana antes de esperar audio**.
 | [`deploy.yml`](./.github/workflows/deploy.yml) | Compila y publica la **web** en GitHub Pages en cada push a `main`. |
 | [`installers.yml`](./.github/workflows/installers.yml) | Compila los **cuatro instaladores** en paralelo (Windows en `windows-latest`, Linux en `ubuntu-latest`) y los deja como artefactos. Al hacer tag, además se adjuntan a un **release**. |
 
+- La versión de los instaladores está en sincronía: `package.json`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.toml` comparten la misma versión. Para publicar un parche, basta con subir un tag `vX.Y.Z` (el CI adjunta los 4 instaladores en el release).
+
 ```bash
-git tag v1.0.0 && git push origin v1.0.0   # publica una release con los 4 instaladores
+git tag v1.0.1 && git push origin v1.0.1   # publica una release con los 4 instaladores
 ```
 
 ## 📁 Estructura
