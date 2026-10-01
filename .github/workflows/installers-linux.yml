@@ -88,9 +88,10 @@ jobs:
             cp -a "$f" "$DEST/" && count=$((count+1))
           done
           echo "plugins copiados: $count"
-          # autoaudiosink + la cadena de audio mínima tienen que estar dentro
-          for req in autoaudiosink alsasink pulsesink audioconvert audioresample; do
-            if ! ls "$DEST" | grep -q ".*$req.*"; then
+          # autoaudiosink no viene en un plugin propio: lo aporta libgstautodetect,
+          # junto con la cadena mínima de audio.
+          for req in libgstautodetect.so libgstpulseaudio.so libgstaudioconvert.so libgstaudioresample.so; do
+            if [ ! -f "$DEST/$req" ]; then
               echo "::error::falta el plugin $req"
               exit 1
             fi
