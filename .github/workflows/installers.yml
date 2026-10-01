@@ -25,7 +25,9 @@ jobs:
           - os: windows-2022
             artifact: windows
     concurrency:
-      group: installers-${{ matrix.artifact }}
+      # El grupo incluye la ref: si no, el push a main cancela el run del tag
+      # que se lanzó en paralelo y la release se queda sin publicarse.
+      group: installers-${{ matrix.artifact }}-${{ github.ref }}
       cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     steps:
       - name: Checkout

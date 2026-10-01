@@ -14,7 +14,7 @@ jobs:
     name: Empaquetar Linux
     runs-on: ubuntu-latest
     concurrency:
-      group: installers-linux
+      group: installers-linux-${{ github.ref }}
       cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
     steps:
       - name: Checkout
