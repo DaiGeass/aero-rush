@@ -61,7 +61,7 @@ jobs:
           set -euo pipefail
           # El AppImage de appimagetool busca su payload con rutas relativas, así
           # que lo dejamos extraído en un sitio fijo y lo ejecutamos desde ahí.
-          ver=13
+          ver=12
           curl -fsSL -o /tmp/appimagetool \
             "https://github.com/AppImage/AppImageKit/releases/download/${ver}/appimagetool-x86_64.AppImage"
           chmod +x /tmp/appimagetool
