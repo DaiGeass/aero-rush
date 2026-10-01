@@ -73,26 +73,27 @@ Los objetivos se toman de `src-tauri/tauri.windows.conf.json` (`.exe` + `.msi`) 
 npm run desktop:build -- --bundles deb
 ```
 
-### ⚠️ Audio en Linux: usa el `.deb` o el `.tar.xz`, no el `.AppImage`
+### 🔊 Audio en Linux
 
-El `.AppImage` **sale mudo**, y no es culpa de tu sistema. Tauri's AppImage bundler mete las
-librerías de GStreamer (`libgstreamer-1.0.so.0`, **1.24**) pero **no los plugins de audio**
-(`gstreamer1.0-plugins-base`). El WebKitGTK del AppImage busca `autoaudiosink`, no lo
-encuentra y se queda sin salida de sonido:
+Hasta la v1.0.2 el `.AppImage` salía **mudo** en Linux. No era tu sistema: el bundler de Tauri
+metía el núcleo de GStreamer (`libgstreamer-1.0.so.0`, **1.24**) pero **no sus plugins**, así
+que el WebKitGTK buscaba `autoaudiosink`, no lo encontraba y se quedaba sin salida de sonido:
 
 ```
 GStreamer element autoaudiosink not found. Please install it
 ```
 
-Los plugins de tu sistema son de GStreamer **1.28**, así que tampoco valen para el núcleo 1.24
-empaquetado. El `.deb` y el `.tar.xz` no empaquetan nada de esto: usan el GStreamer del sistema
-y suenan bien.
+Desde la **v1.0.3** el CI copia los plugins de GStreamer del runner (los mismos **1.24**, así que
+son compatibles con el núcleo empaquetado) dentro del AppImage, verifica que `autoaudiosink`
+esté disponible y reempaqueta. Los tres formatos suenan.
+
+Si te suena a ver el AppImage desde antes de la v1.0.3, descárgalo otra vez.
 
 | Distribución | Qué usar |
 | --- | --- |
 | Debian / Ubuntu | `Aero.Rush_<ver>_amd64.deb` con `sudo apt install ./Aero.Rush_*.deb` |
 | **Arch / Fedora / openSUSE** | `aero-rush-portable.tar.xz`, descomprime y ejecuta `usr/bin/aero-rush` |
-| Cualquiera, sin instalar | `Aero.Rush_<ver>_amd64.AppImage` — **sin audio** |
+| Cualquiera, sin instalar | `Aero.Rush_<ver>_amd64.AppImage` |
 
 En Arch:
 
@@ -115,7 +116,7 @@ una vez sobre la ventana antes de esperar audio**.
 | --- | --- |
 | [`deploy.yml`](./.github/workflows/deploy.yml) | Compila y publica la **web** en GitHub Pages en cada push a `main`. |
 | [`installers.yml`](./.github/workflows/installers.yml) | Compila los **instaladores de Windows** y adjunta los 4 artefactos al **release** cuando hay tag. |
-| [`installers-linux.yml`](./.github/workflows/installers-linux.yml) | Compila los de **Linux**: `.deb`, `.AppImage` (sin audio) y el `.tar.xz` portable que sí suena. |
+| [`installers-linux.yml`](./.github/workflows/installers-linux.yml) | Compila los de **Linux**: `.deb`, `.AppImage` (con los plugins de GStreamer que le hacen falta para el audio) y el `.tar.xz` portable. |
 
 - La versión de los instaladores está en sincronía: `package.json`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.toml` comparten la misma versión. Para publicar un parche, basta con subir un tag `vX.Y.Z` (el CI adjunta los 4 instaladores en el release).
 
