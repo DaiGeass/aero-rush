@@ -59,13 +59,18 @@ jobs:
       - name: Instalar appimagetool
         run: |
           set -euo pipefail
-          TOOLS="$(mktemp -d)"
-          curl -fsSL -o "$TOOLS/appimagetool" \
-            "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-          chmod +x "$TOOLS/appimagetool"
-          "$TOOLS/appimagetool" --appimage-extract > /dev/null
-          sudo install -m 0755 squashfs-root/AppRun /usr/local/bin/appimagetool
-          rm -rf "$TOOLS" squashfs-root
+          # El AppImage de appimagetool busca su payload con rutas relativas, así
+          # que lo dejamos extraído en un sitio fijo y lo ejecutamos desde ahí.
+          ver=13
+          curl -fsSL -o /tmp/appimagetool \
+            "https://github.com/AppImage/AppImageKit/releases/download/${ver}/appimagetool-x86_64.AppImage"
+          chmod +x /tmp/appimagetool
+          rm -rf /opt/appimagetool && mkdir -p /opt/appimagetool
+          /tmp/appimagetool --appimage-extract > /dev/null
+          mv squashfs-root/* /opt/appimagetool/
+          rm -rf squashfs-root /tmp/appimagetool
+          sudo ln -sf /opt/appimagetool/AppRun /usr/local/bin/appimagetool
+          sudo chmod -R a+rX /opt/appimagetool
           appimagetool --version || true
 
       - name: Añadir plugins de GStreamer al AppImage
