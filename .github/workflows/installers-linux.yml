@@ -141,14 +141,17 @@ jobs:
           mkdir -p AppDir/usr/share/icons/hicolor/128x128/apps
           cp -a AppDir/usr/share/icons/hicolor/128x128/apps/*.png AppDir/ 2>/dev/null || true
 
+          # Mismo nombre que genera Tauri, para que el asset del release no cambie.
+          VER="$(node -p "require('./package.json').version")"
+          OUT="src-tauri/target/release/bundle/appimage/Aero.Rush_${VER}_amd64.AppImage"
           rm -f src-tauri/target/release/bundle/appimage/*.AppImage
-          appimagetool --no-appstream AppDir \\
-            src-tauri/target/release/bundle/appimage/Aero.Rush-portable.AppImage
+          appimagetool --no-appstream AppDir "$OUT"
           ls -la src-tauri/target/release/bundle/appimage/
 
           # El AppImage nuevo tiene que traer los plugins y ser ejecutable.
-          NEW="$(ls src-tauri/target/release/bundle/appimage/*.AppImage)"
-          test -x "$NEW" || chmod +x "$NEW"
+          NEW="$OUT"
+          test -f "$NEW" || { echo "::error::appimagetool no dejó el AppImage en $NEW"; exit 1; }
+          chmod +x "$NEW"
           rm -rf verify && "$NEW" --appimage-extract > /dev/null
           echo "plugins en el AppImage final: $(ls squashfs-root/usr/lib/gstreamer-1.0/*.so 2>/dev/null | wc -l)"
           test -f squashfs-root/usr/lib/gstreamer-1.0/libgstautodetect.so
