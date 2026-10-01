@@ -39,7 +39,8 @@ jobs:
             libssl-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev \
-            libarchive-tools
+            libarchive-tools \
+            gstreamer1.0-tools
 
       - name: Rust estable
         uses: dtolnay/rust-toolchain@stable
@@ -104,10 +105,15 @@ jobs:
           # ve autoaudiosink con las variables que fija AppRun, el AppImage
           # volverá a salir mudo.
           cd AppDir
-          export LD_LIBRARY_PATH="$PWD/usr/lib:${LD_LIBRARY_PATH:-}"
+          export LD_LIBRARY_PATH="$PWD/usr/lib"
           export GST_PLUGIN_SYSTEM_PATH="$PWD/usr/lib/gstreamer-1.0"
           export GST_PLUGIN_SYSTEM_PATH_1_0="$GST_PLUGIN_SYSTEM_PATH"
+          export GST_PLUGIN_PATH="$GST_PLUGIN_SYSTEM_PATH"
+          export GST_PLUGIN_PATH_1_0="$GST_PLUGIN_SYSTEM_PATH"
           export GST_REGISTRY="$PWD/gst-registry.bin"
+          export GST_REGISTRY_1_0="$GST_REGISTRY"
+          echo "plugins visibles: $(ls "$GST_PLUGIN_SYSTEM_PATH" | wc -l)"
+          echo "nucleo gst: $(gst-inspect-1.0 --version | head -1)"
           if gst-inspect-1.0 autoaudiosink > /dev/null 2>&1; then
             echo "OK: autoaudiosink disponible dentro del AppDir"
           else
