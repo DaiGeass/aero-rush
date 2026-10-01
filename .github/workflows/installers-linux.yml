@@ -55,6 +55,80 @@ jobs:
       - name: Compilar y empaquetar
         run: npm run desktop:build
 
+      - name: Instalar appimagetool
+        run: |
+          set -euo pipefail
+          TOOLS="$(mktemp -d)"
+          curl -fsSL -o "$TOOLS/appimagetool" \
+            "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x "$TOOLS/appimagetool"
+          "$TOOLS/appimagetool" --appimage-extract > /dev/null
+          sudo install -m 0755 squashfs-root/AppRun /usr/local/bin/appimagetool
+          rm -rf "$TOOLS" squashfs-root
+          appimagetool --version || true
+
+      - name: Añadir plugins de GStreamer al AppImage
+        run: |
+          set -euo pipefail
+          # Tauri empaqueta el núcleo de GStreamer (libgstreamer 1.24) pero no sus
+          # plugins, así que WebKitGTK se queda sin "autoaudiosink" y la app sale
+          # muda. El runner es Ubuntu 24.04 (gst 1.24.2), exactamente la misma
+          # versión, así que sus plugins son compatibles con el núcleo empaquetado.
+          APPIMAGE="$(ls src-tauri/target/release/bundle/appimage/*.AppImage)"
+          rm -rf AppDir
+          "$APPIMAGE" --appimage-extract > /dev/null
+          mv squashfs-root AppDir
+
+          DEST="AppDir/usr/lib/gstreamer-1.0"
+          mkdir -p "$DEST"
+          SRC="/usr/lib/x86_64-linux-gnu/gstreamer-1.0"
+          count=0
+          for f in "$SRC"/*.so; do
+            base="$(basename "$f")"
+            cp -a "$f" "$DEST/" && count=$((count+1))
+          done
+          echo "plugins copiados: $count"
+          # autoaudiosink + la cadena de audio mínima tienen que estar dentro
+          for req in autoaudiosink alsasink pulsesink audioconvert audioresample; do
+            if ! ls "$DEST" | grep -q ".*$req.*"; then
+              echo "::error::falta el plugin $req"
+              exit 1
+            fi
+          done
+
+      - name: Verificar que el AppImage encuentra autoaudiosink
+        run: |
+          set -euo pipefail
+          # Reproducimos el fallo real dentro del propio AppDir: si gst-inspect no
+          # ve autoaudiosink con las variables que fija AppRun, el AppImage
+          # volverá a salir mudo.
+          cd AppDir
+          export LD_LIBRARY_PATH="$PWD/usr/lib:${LD_LIBRARY_PATH:-}"
+          export GST_PLUGIN_SYSTEM_PATH="$PWD/usr/lib/gstreamer-1.0"
+          export GST_PLUGIN_SYSTEM_PATH_1_0="$GST_PLUGIN_SYSTEM_PATH"
+          export GST_REGISTRY="$PWD/gst-registry.bin"
+          if gst-inspect-1.0 autoaudiosink > /dev/null 2>&1; then
+            echo "OK: autoaudiosink disponible dentro del AppDir"
+          else
+            echo "::error::autoaudiosink sigue sin estar disponible en el AppDir"
+            gst-inspect-1.0 autoaudiosink || true
+            exit 1
+          fi
+          rm -f "$PWD/gst-registry.bin"
+          cd ..
+
+      - name: Reempaquetar AppImage
+        env:
+          ARCH: x86_64
+        run: |
+          set -euo pipefail
+          # Sustituye el AppImage roto por uno que sí lleva los plugins.
+          rm -f src-tauri/target/release/bundle/appimage/*.AppImage
+          appimagetool --no-appstream AppDir \
+            src-tauri/target/release/bundle/appimage/Aero.Rush-portable.AppImage
+          ls -la src-tauri/target/release/bundle/appimage/
+          rm -rf AppDir
+
       - name: Empaquetar versión portable (tar.xz)
         run: |
           set -euo pipefail
